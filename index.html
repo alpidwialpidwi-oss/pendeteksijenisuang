@@ -1,43 +1,241 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deployment AI Siswa</title>
-    
-    <!-- Memuat mesin AI (ONNX Runtime Web) agar model bisa berjalan langsung di browser[cite: 2] -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-    
-    <style>
-        body { background-color: #121212; color: white; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { position: relative; width: 640px; height: 480px; border: 2px solid #555; border-radius: 10px; overflow: hidden; }
-        video, canvas#overlay { position: absolute; top: 0; left: 0; width: 640px; height: 480px; }
-        canvas#overlay { z-index: 10; pointer-events: none; }
-        #status { margin: 15px; padding: 10px; border-radius: 5px; background: #1e1e1e; border: 1px solid #444; width: 600px; text-align: center; }
-        .btn-start { padding: 12px 30px; font-size: 1.1rem; cursor: pointer; background: #FF3B30; color: white; border: none; border-radius: 5px; font-weight: bold; }
-        .btn-start:hover { background: #cc2f26; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Deteksi Jenis Uang</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins',sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, #1f2937, #050816 70%);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:30px;
+      color:white;
+    }
+
+    .container{
+      width:100%;
+      max-width:900px;
+      background:rgba(255,255,255,0.05);
+      backdrop-filter:blur(15px);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:25px;
+      padding:35px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .header{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .logo{
+      width:70px;
+      height:70px;
+      margin:auto;
+      margin-bottom:15px;
+      border-radius:20px;
+      background:linear-gradient(135deg,#ef4444,#dc2626);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:32px;
+      box-shadow:0 8px 20px rgba(239,68,68,0.4);
+    }
+
+    .title{
+      font-size:38px;
+      font-weight:700;
+      margin-bottom:10px;
+      background:linear-gradient(to right,#ffffff,#60a5fa);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .subtitle{
+      color:#cbd5e1;
+      font-size:15px;
+    }
+
+    .status-box{
+      margin:30px 0;
+      background:rgba(15,23,42,0.7);
+      border:1px solid rgba(96,165,250,0.3);
+      padding:18px;
+      border-radius:16px;
+      text-align:center;
+      font-weight:600;
+      letter-spacing:1px;
+      color:#93c5fd;
+      box-shadow:0 0 20px rgba(96,165,250,0.15);
+    }
+
+    .camera-box{
+      position:relative;
+      overflow:hidden;
+      border-radius:22px;
+      border:2px solid rgba(255,255,255,0.08);
+      background:#111827;
+      box-shadow:0 15px 35px rgba(0,0,0,0.45);
+    }
+
+    video{
+      width:100%;
+      display:block;
+      border-radius:22px;
+    }
+
+    .overlay{
+      position:absolute;
+      inset:0;
+      border-radius:22px;
+      border:3px dashed rgba(255,255,255,0.25);
+      margin:25px;
+      pointer-events:none;
+    }
+
+    .bottom-panel{
+      margin-top:25px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+    }
+
+    .card{
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:20px;
+      border-radius:18px;
+    }
+
+    .card h3{
+      margin-bottom:10px;
+      font-size:18px;
+      color:#60a5fa;
+    }
+
+    .card p{
+      color:#cbd5e1;
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    .btn-group{
+      margin-top:30px;
+      display:flex;
+      gap:15px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      padding:14px 28px;
+      border:none;
+      border-radius:14px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+      transition:0.3s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      color:white;
+      box-shadow:0 8px 20px rgba(59,130,246,0.4);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 25px rgba(59,130,246,0.5);
+    }
+
+    .btn-danger{
+      background:linear-gradient(135deg,#ef4444,#dc2626);
+      color:white;
+      box-shadow:0 8px 20px rgba(239,68,68,0.4);
+    }
+
+    .btn-danger:hover{
+      transform:translateY(-3px);
+    }
+
+    @media(max-width:768px){
+      .title{
+        font-size:28px;
+      }
+
+      .bottom-panel{
+        grid-template-columns:1fr;
+      }
+
+      .container{
+        padding:20px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- GANTI BAGIAN INI dengan judul proyek kalian -->
-    <h1>🛡️ Proyek AI: Deteksi Jenis Uang</h1>
-    <p>Dibuat oleh: AlpiDwi</p>
-    
-    <button id="btn-init" class="btn-start">AKTIFKAN KAMERA</button>
-    <div id="status">STATUS: MATI</div>
+  <div class="container">
 
-    <div class="container">
-        <!-- Elemen video untuk menampilkan gambar langsung dari kamera laptop/HP[cite: 2] -->
-        <video id="webcam" playsinline muted></video>
-        <!-- Kanvas transparan untuk menggambar kotak deteksi di atas video kamera[cite: 2] -->
-        <canvas id="overlay" width="640" height="480"></canvas>
+    <div class="header">
+      <div class="logo">🛡️</div>
+
+      <h1 class="title">Proyek AI: Deteksi Jenis Uang</h1>
+
+      <p class="subtitle">
+        Sistem kecerdasan buatan untuk mengenali nominal uang secara realtime
+      </p>
     </div>
 
-    <!-- Kanvas tersembunyi yang digunakan sistem untuk menyesuaikan ukuran gambar bagi AI (Jangan dihapus!)[cite: 2] -->
-    <canvas id="processor" width="640" height="640" style="display:none;"></canvas>
+    <div class="status-box">
+      ● SISTEM AKTIF : MENUNGGU OBJEK
+    </div>
 
-    <!-- Memanggil file logika AI kalian -->
-    <script src="app.js"></script>
+    <div class="camera-box">
+      <video autoplay muted></video>
+      <div class="overlay"></div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-primary">Mulai Kamera</button>
+      <button class="btn-danger">Hentikan Kamera</button>
+    </div>
+
+    <div class="bottom-panel">
+
+      <div class="card">
+        <h3>📌 Status Deteksi</h3>
+        <p>
+          Kamera aktif dan siap mendeteksi objek uang secara otomatis menggunakan model AI.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>🤖 Teknologi</h3>
+        <p>
+          Menggunakan Computer Vision dan Deep Learning untuk klasifikasi nominal uang.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
 </body>
 </html>
