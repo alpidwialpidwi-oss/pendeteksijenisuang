@@ -5,8 +5,7 @@ function drawBoxes(boxes) {
         const scaleX = overlay.width / TARGET_SIZE;
         const scaleY = overlay.height / TARGET_SIZE;
 
-        // Warna beda per class
-        const color = box.classId === 0 ? "#22c55e" : "#3b82f6";
+        const color = box.classId === 0 ? "#3b82f6" : "#22c55e";
 
         ctxOverlay.strokeStyle = color;
         ctxOverlay.lineWidth = 3;
@@ -17,20 +16,23 @@ function drawBoxes(boxes) {
             box.h * scaleY
         );
 
-        // Background label
         ctxOverlay.fillStyle = color;
         ctxOverlay.fillRect(
             box.x * scaleX,
             box.y * scaleY - 28,
-            140,
+            160,
             24
         );
 
-        // Text label
         ctxOverlay.fillStyle = "white";
         ctxOverlay.font = "bold 14px Arial";
+
+        const customLabel = box.classId === 0
+            ? "🪙 Uang Logam"
+            : "💵 Uang Kertas";
+
         ctxOverlay.fillText(
-            `${box.classId === 0 ? "💵 Uang Kertas" : "🪙 Uang Logam"} ${(box.score * 100).toFixed(0)}%`,
+            `${customLabel} ${(box.score * 100).toFixed(0)}%`,
             box.x * scaleX + 5,
             box.y * scaleY - 10
         );
