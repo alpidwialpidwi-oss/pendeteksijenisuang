@@ -1,201 +1,430 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deployment AI Siswa</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Deteksi Jenis Uang</title>
 
-    <!-- ONNX Runtime -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<!-- ONNX Runtime -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
+<!-- FONT -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        body{
-            background:
-            radial-gradient(circle at top,#1e293b,#020617 70%);
-            color:white;
-            font-family:'Courier New', Courier, monospace;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            padding:25px;
-            min-height:100vh;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        h1{
-            margin-top:10px;
-            font-size:2.2rem;
-            text-align:center;
-            color:#ffffff;
-            text-shadow:0 0 15px rgba(255,255,255,0.3);
-        }
+:root{
+    --primary:#3b82f6;
+    --primary2:#2563eb;
+    --dark:#020617;
+    --card:#0f172a;
+    --glass:rgba(255,255,255,0.08);
+    --border:rgba(255,255,255,0.12);
+    --success:#22c55e;
+    --danger:#ef4444;
+    --text:#f8fafc;
+    --muted:#94a3b8;
+}
 
-        .creator{
-            margin-top:10px;
-            margin-bottom:20px;
-            font-size:1rem;
-            color:#93c5fd;
-            background:rgba(59,130,246,0.15);
-            padding:8px 18px;
-            border-radius:30px;
-            border:1px solid rgba(147,197,253,0.3);
-            box-shadow:0 0 15px rgba(59,130,246,0.15);
-        }
+body{
+    min-height:100vh;
+    font-family:'Poppins',sans-serif;
+    color:var(--text);
 
-        .btn-start{
-            padding:14px 32px;
-            font-size:1rem;
-            cursor:pointer;
-            background:linear-gradient(135deg,#ef4444,#dc2626);
-            color:white;
-            border:none;
-            border-radius:12px;
-            font-weight:bold;
-            transition:0.3s;
-            box-shadow:0 8px 20px rgba(239,68,68,0.35);
-        }
+    background:
+    radial-gradient(circle at top left,#1e3a8a 0%, transparent 30%),
+    radial-gradient(circle at top right,#0f766e 0%, transparent 30%),
+    radial-gradient(circle at bottom,#312e81 0%, transparent 35%),
+    linear-gradient(135deg,#020617,#0f172a);
 
-        .btn-start:hover{
-            transform:translateY(-3px);
-            box-shadow:0 12px 25px rgba(239,68,68,0.45);
-        }
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:30px;
+}
 
-        #status{
-            margin:18px;
-            padding:14px;
-            border-radius:12px;
-            background:#1e1e1e;
-            border:1px solid #444;
-            width:640px;
-            text-align:center;
-            font-weight:bold;
-            transition:0.4s;
-            letter-spacing:1px;
-        }
+.main-card{
+    width:100%;
+    max-width:900px;
 
-        /* WARNA SAAT SISTEM AKTIF */
-        .active-status{
-            background:linear-gradient(135deg,#16a34a,#22c55e);
-            color:white;
-            border:1px solid #4ade80;
-            box-shadow:0 0 25px rgba(34,197,94,0.5);
-            animation:glow 1.5s infinite alternate;
-        }
+    background:rgba(15,23,42,0.75);
+    backdrop-filter:blur(18px);
 
-        @keyframes glow{
-            from{
-                box-shadow:0 0 10px rgba(34,197,94,0.4);
-            }
-            to{
-                box-shadow:0 0 25px rgba(34,197,94,0.9);
-            }
-        }
+    border:1px solid rgba(255,255,255,0.08);
 
-        .container{
-            position:relative;
-            width:640px;
-            height:480px;
-            border:2px solid rgba(255,255,255,0.15);
-            border-radius:18px;
-            overflow:hidden;
-            background:#000;
-            box-shadow:0 15px 35px rgba(0,0,0,0.5);
-        }
+    border-radius:30px;
 
-        video,
-        canvas#overlay{
-            position:absolute;
-            top:0;
-            left:0;
-            width:640px;
-            height:480px;
-        }
+    padding:30px;
 
-        canvas#overlay{
-            z-index:10;
-            pointer-events:none;
-        }
+    box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
 
-        .camera-frame{
-            position:absolute;
-            inset:15px;
-            border:2px dashed rgba(255,255,255,0.2);
-            border-radius:15px;
-            z-index:5;
-        }
+.header{
+    text-align:center;
+    margin-bottom:25px;
+}
 
-        @media(max-width:700px){
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
 
-            .container,
-            video,
-            canvas#overlay,
-            #status{
-                width:100%;
-                max-width:100%;
-            }
+    padding:8px 18px;
 
-            .container{
-                height:auto;
-                aspect-ratio:4/3;
-            }
+    background:rgba(59,130,246,0.15);
 
-            h1{
-                font-size:1.5rem;
-            }
-        }
-    </style>
+    border:1px solid rgba(59,130,246,0.3);
+
+    color:#bfdbfe;
+
+    border-radius:999px;
+
+    font-size:0.9rem;
+    margin-bottom:18px;
+}
+
+h1{
+    font-size:2.5rem;
+    font-weight:700;
+    margin-bottom:10px;
+
+    background:linear-gradient(to right,#ffffff,#93c5fd);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.subtitle{
+    color:var(--muted);
+    font-size:1rem;
+    line-height:1.7;
+}
+
+.control-panel{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+
+.btn-start{
+    padding:15px 35px;
+
+    border:none;
+    border-radius:16px;
+
+    background:linear-gradient(135deg,#3b82f6,#2563eb);
+
+    color:white;
+    font-size:1rem;
+    font-weight:600;
+    cursor:pointer;
+
+    transition:0.35s ease;
+
+    box-shadow:
+    0 10px 25px rgba(59,130,246,0.4);
+}
+
+.btn-start:hover{
+    transform:translateY(-4px) scale(1.02);
+
+    box-shadow:
+    0 15px 35px rgba(59,130,246,0.5);
+}
+
+.btn-start:active{
+    transform:scale(0.97);
+}
+
+#status{
+    min-width:260px;
+
+    padding:14px 22px;
+
+    border-radius:14px;
+
+    background:rgba(239,68,68,0.15);
+
+    border:1px solid rgba(239,68,68,0.3);
+
+    color:#fecaca;
+
+    font-weight:600;
+    letter-spacing:0.5px;
+    text-align:center;
+
+    transition:0.4s ease;
+}
+
+.active-status{
+    background:rgba(34,197,94,0.15);
+    border:1px solid rgba(34,197,94,0.4);
+    color:#bbf7d0;
+
+    box-shadow:
+    0 0 30px rgba(34,197,94,0.25);
+
+    animation:pulse 1.6s infinite;
+}
+
+@keyframes pulse{
+    0%{
+        box-shadow:0 0 10px rgba(34,197,94,0.15);
+    }
+    100%{
+        box-shadow:0 0 30px rgba(34,197,94,0.45);
+    }
+}
+
+.camera-wrapper{
+    margin-top:30px;
+
+    position:relative;
+
+    width:100%;
+    aspect-ratio:4/3;
+
+    border-radius:24px;
+    overflow:hidden;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    background:black;
+
+    box-shadow:
+    0 20px 40px rgba(0,0,0,0.45);
+}
+
+video,
+canvas#overlay{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+}
+
+canvas#overlay{
+    z-index:10;
+    pointer-events:none;
+}
+
+.scan-frame{
+    position:absolute;
+    inset:20px;
+
+    border:2px solid rgba(255,255,255,0.2);
+    border-radius:20px;
+
+    z-index:5;
+}
+
+.scan-frame::before{
+    content:"";
+
+    position:absolute;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:4px;
+
+    background:linear-gradient(to right,
+    transparent,
+    #38bdf8,
+    transparent);
+
+    animation:scan 3s linear infinite;
+}
+
+@keyframes scan{
+    0%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(350px);
+    }
+
+    100%{
+        transform:translateY(0);
+    }
+}
+
+.info-grid{
+    margin-top:25px;
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+}
+
+.info-card{
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    border-radius:18px;
+
+    padding:18px;
+}
+
+.info-card h3{
+    font-size:0.95rem;
+    margin-bottom:8px;
+    color:#93c5fd;
+}
+
+.info-card p{
+    color:#cbd5e1;
+    line-height:1.6;
+    font-size:0.95rem;
+}
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    color:#64748b;
+    font-size:0.9rem;
+}
+
+@media(max-width:768px){
+
+    .main-card{
+        padding:20px;
+        border-radius:24px;
+    }
+
+    h1{
+        font-size:1.8rem;
+    }
+
+    .subtitle{
+        font-size:0.95rem;
+    }
+
+    .control-panel{
+        flex-direction:column;
+    }
+
+    #status{
+        width:100%;
+    }
+
+    .btn-start{
+        width:100%;
+    }
+}
+</style>
 </head>
 
 <body>
 
-    <h1>🛡️ Proyek AI: Deteksi Jenis Uang</h1>
+<div class="main-card">
 
-    <!-- BY DWI ALPI -->
-    <div class="creator">
-        ✨ By : Dwi Alpi
+    <div class="header">
+
+        <div class="badge">
+            🤖 AI Computer Vision
+        </div>
+
+        <h1>Deteksi Jenis Uang</h1>
+
+        <p class="subtitle">
+            Sistem AI berbasis kamera real-time menggunakan ONNX Runtime
+            untuk mengenali jenis uang secara otomatis dengan tampilan modern.
+        </p>
+
+        <div class="control-panel">
+
+            <button id="btn-init" class="btn-start">
+                🎥 Aktifkan Kamera
+            </button>
+
+            <div id="status">
+                🔴 STATUS : SISTEM MATI
+            </div>
+
+        </div>
     </div>
 
-    <button id="btn-init" class="btn-start">
-        AKTIFKAN KAMERA
-    </button>
+    <!-- CAMERA -->
+    <div class="camera-wrapper">
 
-    <div id="status">
-        🔴 STATUS : MATI
-    </div>
-
-    <div class="container">
-
-        <!-- Kamera -->
         <video id="webcam" playsinline muted autoplay></video>
 
-        <!-- Overlay -->
         <canvas id="overlay" width="640" height="480"></canvas>
 
-        <!-- Dekorasi -->
-        <div class="camera-frame"></div>
+        <div class="scan-frame"></div>
+
     </div>
 
-    <!-- Canvas Processor -->
-    <canvas id="processor" width="640" height="640" style="display:none;"></canvas>
+    <!-- INFO -->
+    <div class="info-grid">
 
-    <!-- Script AI -->
-    <script src="app.js"></script>
+        <div class="info-card">
+            <h3>⚡ Real-time Detection</h3>
+            <p>
+                Kamera mendeteksi objek uang secara langsung
+                menggunakan model AI berbasis ONNX.
+            </p>
+        </div>
 
-    <!-- Efek status aktif -->
-    <script>
-        const btn = document.getElementById("btn-init");
-        const statusBox = document.getElementById("status");
+        <div class="info-card">
+            <h3>🧠 AI Recognition</h3>
+            <p>
+                Sistem mampu mengenali jenis nominal uang
+                dengan proses machine learning modern.
+            </p>
+        </div>
 
-        btn.addEventListener("click", () => {
-            statusBox.innerHTML = "🟢 STATUS : SISTEM AKTIF";
-            statusBox.classList.add("active-status");
-        });
-    </script>
+        <div class="info-card">
+            <h3>🔒 Modern Interface</h3>
+            <p>
+                Tampilan futuristik dengan efek glassmorphism,
+                animasi scanner, dan responsive design.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        ✨ Dibuat oleh Dwi Alpi
+    </div>
+
+</div>
+
+<!-- PROCESSOR -->
+<canvas id="processor" width="640" height="640" style="display:none;"></canvas>
+
+<!-- APP -->
+<script src="app.js"></script>
+
+<script>
+const btn = document.getElementById("btn-init");
+const statusBox = document.getElementById("status");
+
+btn.addEventListener("click", () => {
+
+    statusBox.innerHTML = "🟢 STATUS : SISTEM AKTIF";
+    statusBox.classList.add("active-status");
+
+    btn.innerHTML = "✅ Kamera Aktif";
+});
+</script>
 
 </body>
 </html>
