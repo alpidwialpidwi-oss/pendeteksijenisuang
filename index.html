@@ -1,157 +1,257 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Deteksi Uang</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>💸 AI Deteksi Uang Indonesia</title>
 
-    <!-- ONNX Runtime -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<!-- ONNX Runtime -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
 
-        body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
-            font-family: Arial, Helvetica, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px;
-            min-height: 100vh;
-        }
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top left,#2563eb 0%,transparent 30%),
+        radial-gradient(circle at bottom right,#16a34a 0%,transparent 30%),
+        linear-gradient(135deg,#020617,#0f172a,#111827);
+    color:white;
+    padding:25px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 8px;
-            color: #38bdf8;
-            text-shadow: 0 0 15px rgba(56,189,248,0.5);
-        }
+.dashboard{
+    width:950px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:28px;
+    padding:28px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
 
-        p {
-            color: #cbd5e1;
-            margin-bottom: 20px;
-        }
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
 
-        .btn-start {
-            padding: 14px 35px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(90deg, #22c55e, #16a34a);
-            color: white;
-            transition: 0.3s;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(34,197,94,0.4);
-        }
+.title h1{
+    font-size:2rem;
+    font-weight:800;
+    background:linear-gradient(90deg,#38bdf8,#4ade80);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
 
-        .btn-start:hover {
-            transform: scale(1.05);
-            background: linear-gradient(90deg, #16a34a, #15803d);
-        }
+.title p{
+    margin-top:6px;
+    color:#cbd5e1;
+}
 
-        #status {
-            width: 640px;
-            text-align: center;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            background: rgba(15,23,42,0.8);
-            border: 1px solid #334155;
-            font-weight: bold;
-            color: #f8fafc;
-        }
+#status{
+    padding:12px 18px;
+    border-radius:14px;
+    background:rgba(15,23,42,0.8);
+    border:1px solid rgba(255,255,255,0.08);
+    font-weight:bold;
+    color:#22c55e;
+    box-shadow:0 0 20px rgba(34,197,94,0.2);
+}
 
-        .container {
-            position: relative;
-            width: 640px;
-            height: 480px;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 2px solid #334155;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.5);
-        }
+.main{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:24px;
+}
 
-        video, canvas#overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 640px;
-            height: 480px;
-        }
+.camera-box{
+    background:rgba(255,255,255,0.05);
+    padding:18px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,0.08);
+}
 
-        canvas#overlay {
-            z-index: 10;
-            pointer-events: none;
-        }
+.container{
+    position:relative;
+    width:100%;
+    height:480px;
+    border-radius:18px;
+    overflow:hidden;
+    border:2px solid rgba(56,189,248,0.25);
+    box-shadow:0 0 35px rgba(56,189,248,0.18);
+}
 
-        .legend {
-            display: flex;
-            gap: 20px;
-            margin-top: 18px;
-            font-size: 0.95rem;
-        }
+video,
+canvas#overlay{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+}
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.08);
-            padding: 8px 14px;
-            border-radius: 10px;
-        }
+canvas#overlay{
+    z-index:10;
+    pointer-events:none;
+}
 
-        .color-box {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-        }
+.sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
 
-        .green {
-            background: #22c55e;
-        }
+.card{
+    background:rgba(255,255,255,0.05);
+    border-radius:18px;
+    padding:18px;
+    border:1px solid rgba(255,255,255,0.08);
+}
 
-        .blue {
-            background: #3b82f6;
-        }
-    </style>
+.card h3{
+    margin-bottom:14px;
+    color:#38bdf8;
+    font-size:1rem;
+}
+
+.btn-start{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(90deg,#22c55e,#16a34a);
+    color:white;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 8px 25px rgba(34,197,94,0.35);
+}
+
+.btn-start:hover{
+    transform:translateY(-3px);
+    box-shadow:0 14px 30px rgba(34,197,94,0.5);
+}
+
+.legend{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px;
+    border-radius:12px;
+    background:rgba(255,255,255,0.04);
+}
+
+.color{
+    width:18px;
+    height:18px;
+    border-radius:5px;
+}
+
+.green{background:#22c55e;}
+.blue{background:#3b82f6;}
+
+.info{
+    color:#cbd5e1;
+    line-height:1.6;
+    font-size:0.92rem;
+}
+
+.footer{
+    margin-top:18px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:0.85rem;
+}
+
+#processor{
+    display:none;
+}
+</style>
 </head>
 <body>
 
-    <h1>💸 AI Deteksi Uang Indonesia</h1>
-    <p>Dibuat oleh: Nama Kalian</p>
+<div class="dashboard">
 
-    <button id="btn-init" class="btn-start">AKTIFKAN KAMERA</button>
-
-    <div id="status">STATUS: MATI</div>
-
-    <div class="container">
-        <video id="webcam" playsinline muted></video>
-        <canvas id="overlay" width="640" height="480"></canvas>
-    </div>
-
-    <div class="legend">
-        <div class="legend-item">
-            <div class="color-box green"></div>
-            <span>Uang Kertas</span>
+    <div class="header">
+        <div class="title">
+            <h1>💸 AI Deteksi Uang Indonesia</h1>
+            <p>👨‍💻 Dibuat oleh: Nama Kalian</p>
         </div>
 
-        <div class="legend-item">
-            <div class="color-box blue"></div>
-            <span>Uang Logam</span>
+        <div id="status">🟢 STATUS: SIAP</div>
+    </div>
+
+    <div class="main">
+
+        <div class="camera-box">
+            <div class="container">
+                <video id="webcam" playsinline muted autoplay></video>
+                <canvas id="overlay" width="640" height="480"></canvas>
+            </div>
+        </div>
+
+        <div class="sidebar">
+
+            <div class="card">
+                <h3>🎥 Kontrol Kamera</h3>
+                <button id="btn-init" class="btn-start">
+                    🚀 AKTIFKAN KAMERA
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>🏷️ Label Deteksi</h3>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="color green"></div>
+                        <span>💵 Uang Kertas</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="color blue"></div>
+                        <span>🪙 Uang Logam</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🤖 Informasi AI</h3>
+                <p class="info">
+                    Sistem ini mendeteksi uang secara real-time menggunakan kamera perangkat dan model AI ONNX.
+                </p>
+            </div>
+
         </div>
     </div>
 
-    <!-- Canvas hidden -->
-    <canvas id="processor" width="640" height="640" style="display:none;"></canvas>
+    <div class="footer">
+        ✨ Proyek Kecerdasan Buatan • Real-time Object Detection
+    </div>
 
-    <script src="app.js"></script>
+</div>
+
+<!-- wajib untuk preprocessing -->
+<canvas id="processor" width="640" height="640"></canvas>
+
+<script src="app.js"></script>
 </body>
 </html>
