@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AI Deteksi Uang</title>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
@@ -20,33 +19,22 @@
 
 body{
     font-family:'Poppins',sans-serif;
-
     min-height:100vh;
-
     display:flex;
     justify-content:center;
     align-items:center;
-
-    background:
-    radial-gradient(circle at top,#1e3a8a,#020617 70%);
-
+    background:radial-gradient(circle at top,#1e3a8a,#020617 70%);
     color:white;
 }
 
 .main{
     width:90%;
     max-width:760px;
-
     background:rgba(255,255,255,0.05);
-
     backdrop-filter:blur(15px);
-
     border:1px solid rgba(255,255,255,0.1);
-
     border-radius:25px;
-
     padding:25px;
-
     box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
 
@@ -61,25 +49,18 @@ h1{
     gap:15px;
     justify-content:center;
     flex-wrap:wrap;
-
     margin-bottom:20px;
 }
 
 button{
     padding:14px 28px;
-
     border:none;
     border-radius:14px;
-
     background:linear-gradient(135deg,#2563eb,#3b82f6);
-
     color:white;
-
     font-weight:600;
     font-size:1rem;
-
     cursor:pointer;
-
     transition:0.3s;
 }
 
@@ -89,15 +70,10 @@ button:hover{
 
 #status{
     padding:14px 22px;
-
     border-radius:14px;
-
     background:#1e293b;
-
     border:1px solid rgba(255,255,255,0.1);
-
     font-weight:600;
-
     display:flex;
     align-items:center;
 }
@@ -110,16 +86,11 @@ button:hover{
 
 .container{
     position:relative;
-
     width:100%;
     aspect-ratio:4/3;
-
     overflow:hidden;
-
     border-radius:20px;
-
     background:black;
-
     border:2px solid rgba(255,255,255,0.1);
 }
 
@@ -127,10 +98,8 @@ video,
 #overlay{
     position:absolute;
     inset:0;
-
     width:100%;
     height:100%;
-
     object-fit:cover;
 }
 
@@ -141,62 +110,15 @@ video,
 .frame{
     position:absolute;
     inset:15px;
-
     border:2px dashed rgba(255,255,255,0.2);
-
     border-radius:15px;
-
     z-index:5;
 }
 
-/* ICON BAWAH */
-.bottom-icons{
-    margin-top:18px;
-
-    display:flex;
-    justify-content:center;
-    gap:25px;
-}
-
-.icon-box{
-    width:55px;
-    height:55px;
-
-    border-radius:16px;
-
-    background:rgba(255,255,255,0.06);
-
-    border:1px solid rgba(255,255,255,0.1);
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    font-size:1.4rem;
-
-    transition:0.3s;
-}
-
-.icon-box:hover{
-    transform:translateY(-4px);
-    background:rgba(59,130,246,0.2);
-}
-
 @media(max-width:700px){
-
-    h1{
-        font-size:1.5rem;
-    }
-
-    .top{
-        flex-direction:column;
-    }
-
-    button,
-    #status{
-        width:100%;
-        justify-content:center;
-    }
+    h1{font-size:1.5rem;}
+    .top{flex-direction:column;}
+    button,#status{width:100%;justify-content:center;}
 }
 
 </style>
@@ -210,13 +132,9 @@ video,
 
     <div class="top">
 
-        <button id="btn-init">
-            Aktifkan Kamera
-        </button>
+        <button id="btn-init">Aktifkan Kamera</button>
 
-        <div id="status">
-            🔴 Mati
-        </div>
+        <div id="status">🔴 Mati</div>
 
     </div>
 
@@ -230,17 +148,6 @@ video,
 
     </div>
 
-    <!-- ICON SAJA -->
-    <div class="bottom-icons">
-
-        <div class="icon-box">⚡</div>
-
-        <div class="icon-box">🧠</div>
-
-        <div class="icon-box">🔒</div>
-
-    </div>
-
 </div>
 
 <canvas id="processor" width="640" height="640" style="display:none;"></canvas>
@@ -248,17 +155,13 @@ video,
 <script src="app.js"></script>
 
 <script>
-
 const btn = document.getElementById("btn-init");
 const statusBox = document.getElementById("status");
 
 btn.addEventListener("click",()=>{
-
     statusBox.innerHTML = "🟢 Aktif";
     statusBox.classList.add("active-status");
-
 });
-
 </script>
 
 </body>
