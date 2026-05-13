@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AI Deteksi Uang</title>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
@@ -53,14 +52,7 @@ body{
 h1{
     text-align:center;
     font-size:2rem;
-    margin-bottom:8px;
-}
-
-.creator{
-    text-align:center;
-    color:#93c5fd;
     margin-bottom:20px;
-    font-size:0.95rem;
 }
 
 .top{
@@ -182,10 +174,6 @@ video,
 
     <h1>💵 AI Deteksi Uang</h1>
 
-    <div class="creator">
-        By Dwi Alpi
-    </div>
-
     <div class="top">
 
         <button id="btn-init">
@@ -193,7 +181,7 @@ video,
         </button>
 
         <div id="status">
-            🔴 Sistem Mati
+            🔴 Mati
         </div>
 
     </div>
@@ -221,7 +209,7 @@ const statusBox = document.getElementById("status");
 
 btn.addEventListener("click",()=>{
 
-    statusBox.innerHTML = "🟢 Sistem Aktif";
+    statusBox.innerHTML = "🟢 Aktif";
     statusBox.classList.add("active-status");
 
 });
