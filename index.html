@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>AI Deteksi Uang</title>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
@@ -148,6 +149,39 @@ video,
     z-index:5;
 }
 
+/* ICON BAWAH */
+.bottom-icons{
+    margin-top:18px;
+
+    display:flex;
+    justify-content:center;
+    gap:25px;
+}
+
+.icon-box{
+    width:55px;
+    height:55px;
+
+    border-radius:16px;
+
+    background:rgba(255,255,255,0.06);
+
+    border:1px solid rgba(255,255,255,0.1);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:1.4rem;
+
+    transition:0.3s;
+}
+
+.icon-box:hover{
+    transform:translateY(-4px);
+    background:rgba(59,130,246,0.2);
+}
+
 @media(max-width:700px){
 
     h1{
@@ -193,6 +227,17 @@ video,
         <canvas id="overlay" width="640" height="480"></canvas>
 
         <div class="frame"></div>
+
+    </div>
+
+    <!-- ICON SAJA -->
+    <div class="bottom-icons">
+
+        <div class="icon-box">⚡</div>
+
+        <div class="icon-box">🧠</div>
+
+        <div class="icon-box">🔒</div>
 
     </div>
 
