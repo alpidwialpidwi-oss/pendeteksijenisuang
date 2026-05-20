@@ -158,7 +158,7 @@ function drawBoxes(boxes) {
         ctxOverlay.lineWidth = 3;
         ctxOverlay.strokeRect(box.x * scaleX, box.y * scaleY, box.w * scaleX, box.h * scaleY);
         
-        ctxOverlay.fillStyle = "#34C759";
+        ctxOverlay.fillStyle = "#00008B";
         ctxOverlay.font = "bold 16px Arial";
         ctxOverlay.fillText(`${CONFIG.labels[box.classId]} ${(box.score * 100).toFixed(0)}%`, box.x * scaleX, box.y * scaleY - 5);
     });
